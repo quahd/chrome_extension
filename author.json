@@ -1,0 +1,40 @@
+[
+  {
+    "defaultLocale": {
+      "name": {
+        "first_name": {
+          "one": "Nguyen",
+          "two": "Minh"
+        },
+        "last_name" : "Quan"
+      },
+      "creator": "System Admin",
+      "description": "This is a description for testing nested fields."
+    },
+    "id": "ABC123",
+    "type": "application",
+    "version": "1.0.5",
+    "sourceURI": "https://example.com/resource",
+    "visible": true,
+    "active": false,
+    "applyBackgroundUpdates": true,
+    "location": "/var/lib/example",
+    "path": "/usr/local/bin/example"
+  },
+  {
+    "defaultLocale": {
+      "name": "Example Name 2",
+      "creator": "None",
+      "description": "This is a description for testing nested fields. 2"
+    },
+    "id": "XYZ",
+    "type": "application",
+    "version": "1.0.5",
+    "sourceURI": "https://example.com/resource",
+    "visible": true,
+    "active": false,
+    "applyBackgroundUpdates": true,
+    "location": "/var/lib/example",
+    "path": "/usr/local/bin/example"
+  }
+]
