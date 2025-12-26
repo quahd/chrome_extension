@@ -88,25 +88,72 @@ fn getExtensionFromSnapshot(snapshot: ChromeProfileSnapshotExtension)  {
 }
 
 fn getExtensionProperties(parsed_manifest: JSonValue) {
-    let ExtensionPropertyMap kExtensionPropertyList = {
-        {ExtensionProperty::Type::String, "name", "name"},
-        {ExtensionProperty::Type::String, "update_url", "update_url"},
-        {ExtensionProperty::Type::String, "version", "version"},
-        {ExtensionProperty::Type::String, "author", "author"},
-        {ExtensionProperty::Type::String, "default_locale", "default_locale"},
-        {ExtensionProperty::Type::String, "current_locale", "current_locale"},
-        {ExtensionProperty::Type::String, "background.persistent", "persistent"},
-        {ExtensionProperty::Type::String, "description", "description"},
-        {ExtensionProperty::Type::StringArray, "permissions", "permissions"},
-
-        {ExtensionProperty::Type::StringArray,
-        "optional_permissions",
-        "optional_permissions"},
-
-        {ExtensionProperty::Type::String, "key", "key"},
-    };
-    for property in {
-
+    let ExtensionPropertyMap = vec![
+        ExtensionProperty { ty: PropertyType::String, path: "name".to_string(), name: "name".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "update_url".to_string(), name: "update_url".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "version".to_string(), name: "version".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "author".to_string(), name: "author".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "default_locale".to_string(), name: "default_locale".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "current_locale".to_string(), name: "current_locale".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "background.persistent".to_string(), name: "persistent".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "description".to_string(), name: "description".to_string() },
+        ExtensionProperty { ty: PropertyType::StringArray, path: "permissions".to_string(), name: "permissions".to_string() },
+        ExtensionProperty { ty: PropertyType::StringArray, path: "optional_permissions".to_string(), name: "optional_permissions".to_string() },
+        ExtensionProperty { ty: PropertyType::String, path: "key".to_string(), name: "key".to_string() },
+    ];
+    let mut properties = HashMap::new();
+    for property in ExtensionPropertyMap {
+        let mut opt_node = match parsed_manifest.get(&property.path){
+            Some(value) => value,
+            None => {
+                continue;
+            }
+        };
+        if property.ty == PropertyType::String {
+            match opt_node.clone() {
+                JSonValue::String(value) => {
+                    if !value.is_empty() {
+                        properties.insert(property.clone().name, value);
+                    }else{
+                        continue;
+                    }
+                },
+                _ => {
+                    continue;
+                }
+            }
+        }else if property.ty == PropertyType::StringArray {
+            let mut list_value = String::new();
+            match opt_node {
+                JSonValue::Array(arr) => {
+                    for p in arr {
+                        match p {
+                            JSonValue::String(child_node) => {
+                                list_value.push_str(", ");
+                                list_value.push_str(child_node);
+                            },
+                            _ => {
+                                continue;
+                            }
+                        }
+                    }
+                    properties.insert(property.clone().name, list_value);
+                         // Also provide the json-encoded value
+                    let list_value_json = match serde_json::to_string(opt_node){
+                        Ok(vl_json) => vl_json,
+                        Err(_e) => {
+                            let err = format!("lỗi khi chuyển nodes thành json  {:?}", _e);
+                            continue;
+                        }
+                    };
+                    let name_arr = format!("{}{}", property.clone().name, "_json");
+                    properties.insert(name_arr, list_value_json);
+                },
+                _ => {}              
+            }
+        }else{
+            let err = format!("Invalid property type specified");
+        }
     }
 }
 
